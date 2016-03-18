@@ -17,4 +17,5 @@
                  [cheshire "5.5.0"]
                  [com.zaxxer/HikariCP "2.4.3"]]
   :aot [akvo-reporting-consumer.core]
-  :main akvo-reporting-consumer.core)
+  :main akvo-reporting-consumer.core
+  :uberjar-name "reporting-consumer.jar")

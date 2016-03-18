@@ -350,7 +350,7 @@
                     (parse-answer-with-answer-type answerType value))
                   (catch Exception e
                     {:value value})))
-               iteration
+               (or iteration 0)
                id])
       (do
         (when-not formInstanceId
