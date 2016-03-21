@@ -15,6 +15,7 @@
                  [com.taoensso/timbre "4.2.0" :exclusions [org.clojure/tools.reader]]
                  [compojure "1.4.0"]
                  [cheshire "5.5.0"]
+                 [environ "1.0.2"]
                  [com.zaxxer/HikariCP "2.4.3"]]
   :aot [akvo-reporting-consumer.core]
   :main akvo-reporting-consumer.core

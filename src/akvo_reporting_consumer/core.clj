@@ -12,10 +12,11 @@
             [akvo-reporting-consumer.consumer :as consumer]
             [compojure.core :refer (defroutes GET POST routes)]
             [ring.adapter.jetty :as jetty]
-            [taoensso.timbre :as log])
+            [taoensso.timbre :as log]
+            [environ.core :refer (env)])
   (:import [org.postgresql.util PSQLException]))
 
-(defonce dev? (some? (System/getenv "AKVO_REPORTING_DEV_MODE")))
+(defonce dev? (some? (:akvo-reporting-dev-mode env)))
 
 (defn get-config [akvo-config-path config-file-name]
   (let [config (-> (str akvo-config-path "/services/reporting/" config-file-name)
@@ -96,14 +97,16 @@
      "ok")))
 
 (defn -main [repos-dir config-file-name]
-  (git/ensure-directory repos-dir)
-  (when-not dev? (git/clone-or-pull repos-dir "akvo-config"))
-  (let [config (get-config (str repos-dir "/akvo-config")
-                           config-file-name)
-        running-consumers (run-consumers config)]
-    (log/merge-config! {:level (:log-level config :info)
-                        :output-fn (partial log/default-output-fn {:stacktrace-fonts {}})})
-    (let [port (Integer. (:port config 3030))]
-      (jetty/run-jetty (app (atom config) (atom running-consumers))
-                       {:port port
-                        :join? false}))))
+  (let [clone-url (format "https://%s@github.com/akvo/akvo-config"
+                          (:github-oauth-token env))]
+    (git/ensure-directory repos-dir)
+    (when-not dev? (git/clone-or-pull repos-dir clone-url))
+    (let [config (get-config (str repos-dir "/akvo-config")
+                             config-file-name)
+          running-consumers (run-consumers config)]
+      (log/merge-config! {:level (:log-level config :info)
+                          :output-fn (partial log/default-output-fn {:stacktrace-fonts {}})})
+      (let [port (Integer. (:port config 3030))]
+        (jetty/run-jetty (app (atom config) (atom running-consumers))
+                         {:port port
+                          :join? false})))))
