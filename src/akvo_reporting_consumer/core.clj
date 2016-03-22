@@ -18,12 +18,12 @@
 
 (defonce dev? (some? (:akvo-reporting-dev-mode env)))
 
-(defn get-config [akvo-config-path config-file-name]
-  (let [config (-> (str akvo-config-path "/services/reporting/" config-file-name)
+(defn get-config [akvo-config-path config-filename]
+  (let [config (-> (str akvo-config-path "/services/reporting/" config-filename)
                    slurp
                    edn/read-string
                    (assoc :akvo-config-path akvo-config-path
-                          :config-file-name config-file-name))
+                          :config-filename config-filename))
         instances (reduce (fn [result org-id]
                             (update-in result
                                        [org-id]
@@ -49,7 +49,7 @@
   (let [previous-config @current-config
         repos-dir (:akvo-config-path previous-config)
         next-config (do (when-not dev? (git/pull repos-dir "akvo-config"))
-                        (get-config repos-dir (:config-file-name previous-config)))
+                        (get-config repos-dir (:config-filename previous-config)))
         previous-instances (-> previous-config :instances keys set)
         next-instances (-> next-config :instances keys set)
         new-instances (set/difference next-instances previous-instances)
@@ -96,13 +96,15 @@
      (reload-config config running-consumers)
      "ok")))
 
-(defn -main [repos-dir config-file-name]
+(defn -main []
   (let [clone-url (format "https://%s@github.com/akvo/akvo-config"
-                          (:github-oauth-token env))]
+                          (:github-oauth-token env))
+        repos-dir (:akvo-reporting-repos-dir env "/tmp/repos")
+        config-filename (:akvo-reporting-config-filename env "test.edn")]
     (git/ensure-directory repos-dir)
     (when-not dev? (git/clone-or-pull repos-dir clone-url))
     (let [config (get-config (str repos-dir "/akvo-config")
-                             config-file-name)
+                             config-filename)
           running-consumers (run-consumers config)]
       (log/merge-config! {:level (:log-level config :info)
                           :output-fn (partial log/default-output-fn {:stacktrace-fonts {}})})
