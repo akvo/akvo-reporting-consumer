@@ -2,9 +2,22 @@ create table survey (
   id bigint primary key,
   display_text text,
   description text,
+  folder_id bigint,
   created_at timestamp default current_timestamp,
   updated_at timestamp default current_timestamp
 );
+
+create index on survey (folder_id);
+
+create table folder (
+  id bigint primary key,
+  display_text text,
+  parent_id bigint,
+  created_at timestamp default current_timestamp,
+  updated_at timestamp default current_timestamp
+)
+
+create index on folder (parent_id);
 
 create table form (
   id bigint primary key,

@@ -64,13 +64,24 @@
 (def queries
   {:survey
    {:insert "insert into survey
-               (display_text, description, id) values
-               (?, ?, ?)"
+               (display_text, description, folder_id, id) values
+               (?, ?, ?, ?)"
     :update "update survey set
                display_text=?,
                description=?,
+               folder_id=?
                updated_at=now()
              where id=?"}
+   :folder
+   {:insert "insert into folder
+               (display_text, parent_id, id) values
+               (?, ?, ?)"
+    :update "update survey set
+               display_text=?,
+               parent_id=?
+               updated_at=now()
+             where id=?"}
+
    :form
    {:insert "insert into form
                (survey_id, display_text, description, id) values
@@ -162,24 +173,33 @@
 (defmethod handle-event* :delete
   [conn event]
   (when-let [table (condp = (get event "eventType")
-                     "surveyGroupDeleted" "survey"
+                     "surveyGroupDeleted" "survey" ;; Can also be a folder
                      "formDeleted" "form"
                      "questionGroupDeleted" "question_group"
                      "questionDeleted" "question"
                      "dataPointDeleted" "data_point"
                      "formInstanceDeleted" "form_instance"
                      "answerDeleted" "response")]
-    (jdbc/execute! conn [(format "delete from %s where id=?" table)
-                         (get-in event ["entity" "id"])])))
+    (let [id (get-in event ["entity" "id"])]
+      (if (= table "survey")
+        (do (jdbc/execute! conn ["delete from survey where id=?" id])
+            (jdbc/execute! conn ["delete from folder where id=?" id]))
+        (jdbc/execute! conn [(format "delete from %s where id=?" table) id])))))
 
 (defmethod handle-event* :survey
   [conn event]
-  (let [{:strs [id name description surveyGroupType]} (get event "entity")]
-    (when (= surveyGroupType "SURVEY")
+  (let [{:strs [id name description surveyGroupType parentId]} (get event "entity")]
+    (if (= surveyGroupType "SURVEY")
       (upsert conn
               :survey
               [name
                description
+               parentId
+               id])
+      (upsert conn
+              :folder
+              [name
+               parentId
                id]))))
 
 (defmethod handle-event* :form
