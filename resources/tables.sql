@@ -15,7 +15,7 @@ create table folder (
   parent_id bigint,
   created_at timestamp default current_timestamp,
   updated_at timestamp default current_timestamp
-)
+);
 
 create index on folder (parent_id);
 

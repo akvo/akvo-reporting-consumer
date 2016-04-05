@@ -69,16 +69,16 @@
     :update "update survey set
                display_text=?,
                description=?,
-               folder_id=?
+               folder_id=?,
                updated_at=now()
              where id=?"}
    :folder
    {:insert "insert into folder
                (display_text, parent_id, id) values
                (?, ?, ?)"
-    :update "update survey set
+    :update "update folder set
                display_text=?,
-               parent_id=?
+               parent_id=?,
                updated_at=now()
              where id=?"}
 
@@ -194,22 +194,22 @@
               :survey
               [name
                description
-               parentId
+               (or parentId 0)
                id])
       (upsert conn
               :folder
               [name
-               parentId
+               (or parentId 0)
                id]))))
 
 (defmethod handle-event* :form
   [conn event]
-  (let [{:strs [id surveyId displayText description]} (get event "entity")]
+  (let [{:strs [id surveyId name description]} (get event "entity")]
     (if surveyId
       (upsert conn
               :form
               [surveyId
-               displayText
+               name
                description
                id])
       (log/debugf "Missing surveyId for form #%s" id))))
@@ -411,7 +411,7 @@
       :offset))
 
 (defn reset-data [ds]
-  (doseq [table ["survey" "form" "question_group" "question" "data_point" "form_instance" "response"]]
+  (doseq [table ["survey" "folder" "form" "question_group" "question" "data_point" "form_instance" "response"]]
     (jdbc/execute! {:datasource ds} [(format "DELETE FROM %s" table)]))
   (jdbc/execute! {:datasource ds} ["UPDATE consumer_offset SET \"offset\"=0"]))
 
