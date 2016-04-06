@@ -40,7 +40,7 @@ psql -d akvoflow-uat1 -f resources/tables.sql
 ```
 * Run the consumer with
 ``` sh
-env AKVO_REPORTING_DEV_MODE=true lein run
+AKVO_REPORTING_DEV_MODE=true lein run
 ```
 
 
