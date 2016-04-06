@@ -2,7 +2,9 @@
 
 ## Running locally
 
-* Clone `https://github.com/akvo/akvo-config` to `/tmp/repos` or to a location specified by specified by the `AKVO_REPORTING_REPOS_DIR`
+
+* Clone `https://github.com/akvo/akvo-config` to `/tmp/repos` or to a location
+specified by by the `AKVO_REPORTING_REPOS_DIR` enviroment variable).
 * Edit the file `akvo-config/services/reporting/test.edn` to make it match
 
 ```clojure
@@ -23,10 +25,23 @@
              }}
 ```
 
-* Open an ssh tunnel to the unilog test instance: `ssh -nNT -L 5433:unilog.test.akvo.org:5432 <you>@unilog.akvo.org`
+* Open an ssh tunnel to the unilog test instance:
+``` sh
+ssh -nNT -L 5433:unilog.test.akvo.org:5432 <you>@unilog.akvo.org
+```
 * You need a local postgres instance running on port 5432
-* Create the reporting db: `createdb akvoflow-uat1`
-* Generate the tables: `psql -d akvoflow-uat1 -f resources/tables.sql`
-* Run the consumer with `AKVO_REPORTING_DEV_MODE=true lein run`
+* Create the reporting db:
+``` sh
+createdb akvoflow-uat1
+```
+* Generate the tables:
+``` sh
+psql -d akvoflow-uat1 -f resources/tables.sql
+```
+* Run the consumer with
+``` sh
+env AKVO_REPORTING_DEV_MODE=true lein run
+```
+
 
 Copyright © 2015 Akvo Foundation
