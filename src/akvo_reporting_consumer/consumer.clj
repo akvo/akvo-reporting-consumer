@@ -117,13 +117,13 @@
              where id=?"}
    :data-point
    {:insert "insert into data_point
-               (survey_id, identifier, longitude, latitude, id) values
+               (survey_id, identifier, latitude, longitude, id) values
                (?, ?, ?, ?, ?)"
     :update "update data_point set
                survey_id=?,
                identifier=?,
-               longitude=?,
                latitude=?,
+               longitude=?,
                updated_at=now()
              where id=?"}
    :form-instance
