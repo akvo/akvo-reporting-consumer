@@ -1,0 +1,9 @@
+drop table if exists consumer_offset;
+drop table if exists response;
+drop table if exists question;
+drop table if exists question_group;
+drop table if exists form_instance;
+drop table if exists data_point;
+drop table if exists form;
+drop table if exists folder;
+drop table if exists survey;

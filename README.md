@@ -30,13 +30,9 @@ specified by by the `AKVO_REPORTING_REPOS_DIR` enviroment variable).
 ssh -nNT -L 5433:unilog.test.akvo.org:5432 <you>@unilog.akvo.org
 ```
 * You need a local postgres instance running on port 5432
-* Create the reporting db:
+* Create the master reporting db (used for runtime migrations of instance databases):
 ``` sh
-createdb akvoflow-uat1
-```
-* Generate the tables:
-``` sh
-psql -d akvoflow-uat1 -f resources/tables.sql
+createdb akvo-reporting
 ```
 * Run the consumer with
 ``` sh
