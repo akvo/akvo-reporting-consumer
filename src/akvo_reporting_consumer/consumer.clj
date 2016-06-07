@@ -1,14 +1,15 @@
 (ns akvo-reporting-consumer.consumer
-  (:require [akvo-reporting-consumer.pg :as pg]
-            [clojure.string :as string]
-            [clojure.java.jdbc :as jdbc]
-            [clojure.core.async :as async]
+  (:require [akvo-reporting-consumer.migrations :as migrations]
+            [akvo-reporting-consumer.pg :as pg]
             [cheshire.core :as json]
+            [clojure.core.async :as async]
+            [clojure.java.jdbc :as jdbc]
+            [clojure.string :as string]
             [taoensso.timbre :as log])
-  (:import [org.postgresql.util PSQLException]
-           [com.fasterxml.jackson.core JsonParseException]
+  (:import [com.fasterxml.jackson.core JsonParseException]
+           [com.zaxxer.hikari HikariConfig HikariDataSource]
            [java.sql.Date]
-           [com.zaxxer.hikari HikariConfig HikariDataSource]))
+           [org.postgresql.util PSQLException]))
 
 (defprotocol IConsumer
   (-start [consumer])
@@ -425,6 +426,7 @@
         (when (:running? @state)
           (throw (ex-info "Consumer already running" config)))
         (log/infof "Starting consumer for %s" (:org-id config))
+        (migrations/migrate-instance-db config)
         (let [ds (datasource config)
               offset (get-offset ds)
               chan (async/chan)]

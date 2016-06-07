@@ -1,0 +1,9 @@
+drop table consumer_offset;
+drop table response;
+drop table question;
+drop table question_group;
+drop table form_instance;
+drop table data_point;
+drop table form;
+drop table folder;
+drop table survey;
